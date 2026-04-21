@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecce Romani — Chapter 1 Vocab</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #16213e;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #0f3460;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+      color: #e94560;
+      letter-spacing: 0.5px;
+    }
+
+    header span {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 16px 24px;
+      background: #16213e;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      background: #0f3460;
+      color: #aac;
+    }
+
+    nav button.active {
+      background: #e94560;
+      color: #fff;
+    }
+
+    nav button:hover:not(.active) {
+      background: #1a4a80;
+      color: #fff;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 32px auto;
+      padding: 0 16px;
+    }
+
+    /* ── FLASHCARDS ── */
+    #flashcard-view { display: none; }
+
+    .progress-bar-wrap {
+      background: #0f3460;
+      border-radius: 8px;
+      height: 8px;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      background: #e94560;
+      height: 8px;
+      border-radius: 8px;
+      transition: width 0.3s;
+    }
+
+    .card-counter {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    .card-scene {
+      perspective: 1000px;
+      height: 260px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+      transform-style: preserve-3d;
+    }
+
+    .card-scene.flipped .card-inner { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 24px;
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, #0f3460, #16213e);
+      border: 2px solid #1a4a80;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #3a0f3f, #1e0b2e);
+      border: 2px solid #6a2080;
+      transform: rotateY(180deg);
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #888;
+    }
+
+    .card-word {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+
+    .card-hint {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .card-definition {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #f0c0ff;
+      text-align: center;
+    }
+
+    .card-part {
+      font-size: 0.8rem;
+      color: #a070c0;
+      font-style: italic;
+    }
+
+    .card-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: #e94560; color: #fff; }
+    .btn-primary:hover { background: #c73050; }
+    .btn-secondary { background: #0f3460; color: #aac; }
+    .btn-secondary:hover { background: #1a4a80; color: #fff; }
+    .btn-icon {
+      background: #0f3460;
+      color: #aac;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon:hover { background: #1a4a80; color: #fff; }
+
+    .shuffle-btn {
+      display: block;
+      margin: 12px auto 0;
+      background: transparent;
+      border: 1px solid #333;
+      color: #888;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .shuffle-btn:hover { border-color: #e94560; color: #e94560; }
+
+    /* ── MULTIPLE CHOICE ── */
+    #quiz-view { display: none; }
+
+    .quiz-question {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .quiz-prompt {
+      font-size: 0.8rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .quiz-term {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #ccc;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .quiz-option:hover:not(:disabled) {
+      border-color: #e94560;
+      color: #fff;
+      background: #1e2a4a;
+    }
+
+    .quiz-option.correct {
+      border-color: #4caf50;
+      background: #1a3a1a;
+      color: #8fdc8f;
+    }
+
+    .quiz-option.wrong {
+      border-color: #e94560;
+      background: #3a1a1a;
+      color: #dc8f8f;
+    }
+
+    .quiz-option:disabled { cursor: default; }
+
+    .quiz-feedback {
+      text-align: center;
+      margin: 16px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 28px;
+    }
+
+    .quiz-feedback.correct { color: #4caf50; }
+    .quiz-feedback.wrong { color: #e94560; }
+
+    .score-display {
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    /* ── MATCH ── */
+    #match-view { display: none; }
+
+    .match-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .match-card {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: #ccc;
+      transition: all 0.15s;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .match-card:hover:not(.matched):not(.selected) {
+      border-color: #e94560;
+      color: #fff;
+    }
+
+    .match-card.selected {
+      border-color: #4a90e2;
+      background: #0a2040;
+      color: #fff;
+    }
+
+    .match-card.matched {
+      border-color: #4caf50;
+      background: #0a2010;
+      color: #4caf50;
+      cursor: default;
+      opacity: 0.7;
+    }
+
+    .match-card.wrong-shake {
+      border-color: #e94560;
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .match-status {
+      text-align: center;
+      margin-bottom: 16px;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    /* ── BROWSE ── */
+    #browse-view { display: none; }
+
+    .browse-search {
+      width: 100%;
+      padding: 10px 16px;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 10px;
+      color: #e0e0e0;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .browse-search:focus { border-color: #e94560; }
+
+    .vocab-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .vocab-table thead tr {
+      background: #0f3460;
+      color: #aac;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .vocab-table th, .vocab-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .vocab-table tbody tr:hover { background: #16213e; }
+
+    .vocab-table .latin { font-weight: 600; color: #e0c0ff; }
+    .vocab-table .pos { font-size: 0.8rem; color: #888; font-style: italic; }
+
+    /* ── RESULT ── */
+    .result-screen {
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .result-screen h2 {
+      font-size: 2rem;
+      color: #e94560;
+      margin-bottom: 8px;
+    }
+
+    .result-screen .score {
+      font-size: 4rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 16px 0;
+    }
+
+    .result-screen p { color: #888; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Ecce Romani — Chapter 1</h1>
+  <span>Latin Vocabulary Flashcards</span>
+</header>
+
+<nav>
+  <button class="active" onclick="showView('flashcard')">Flashcards</button>
+  <button onclick="showView('quiz')">Multiple Choice</button>
+  <button onclick="showView('match')">Match</button>
+  <button onclick="showView('browse')">Browse All</button>
+</nav>
+
+<main>
+
+  <!-- FLASHCARDS -->
+  <div id="flashcard-view">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="fc-progress"></div></div>
+    <div class="card-counter" id="fc-counter"></div>
+    <div class="card-scene" id="fc-scene" onclick="flipCard()">
+      <div class="card-inner" id="fc-inner">
+        <div class="card-face card-front">
+          <div class="card-label">Latin</div>
+          <div class="card-word" id="fc-front-word"></div>
+          <div class="card-hint">click to reveal</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">English</div>
+          <div class="card-definition" id="fc-back-def"></div>
+          <div class="card-part" id="fc-back-pos"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-controls">
+      <button class="btn-icon" onclick="fcNav(-1)" title="Previous">&#8592;</button>
+      <button class="btn btn-secondary" onclick="flipCard()">Flip</button>
+      <button class="btn-icon" onclick="fcNav(1)" title="Next">&#8594;</button>
+    </div>
+    <button class="shuffle-btn" onclick="shuffleCards()">&#x1F500; Shuffle</button>
+  </div>
+
+  <!-- MULTIPLE CHOICE QUIZ -->
+  <div id="quiz-view">
+    <div class="score-display" id="quiz-score"></div>
+    <div id="quiz-area"></div>
+  </div>
+
+  <!-- MATCHING -->
+  <div id="match-view">
+    <div class="match-status" id="match-status"></div>
+    <div class="match-grid" id="match-grid"></div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn btn-secondary" onclick="initMatch()">New Round</button>
+    </div>
+  </div>
+
+  <!-- BROWSE -->
+  <div id="browse-view">
+    <input class="browse-search" id="browse-search" type="text" placeholder="Search Latin or English..." oninput="renderBrowse()" />
+    <table class="vocab-table">
+      <thead><tr><th>Latin</th><th>English</th><th>Part of Speech</th></tr></thead>
+      <tbody id="browse-tbody"></tbody>
+    </table>
+  </div>
+
+</main>
+
+<script>
+const vocab = [
+  { latin: "puella",       english: "girl",                   pos: "noun" },
+  { latin: "Romana",       english: "Roman",                  pos: "adjective" },
+  { latin: "est",          english: "is",                     pos: "verb" },
+  { latin: "in",           english: "in, on",                 pos: "preposition" },
+  { latin: "villa",        english: "country house, villa",   pos: "noun" },
+  { latin: "habitat",      english: "lives, dwells",          pos: "verb" },
+  { latin: "etiam",        english: "also, even",             pos: "adverb" },
+  { latin: "amica",        english: "friend (female)",        pos: "noun" },
+  { latin: "vicina",       english: "neighbor (female)",      pos: "noun" },
+  { latin: "sub",          english: "under, beneath",         pos: "preposition" },
+  { latin: "arbore",       english: "tree (ablative)",        pos: "noun" },
+  { latin: "sedet",        english: "sits, is sitting",       pos: "verb" },
+  { latin: "legit",        english: "reads, is reading",      pos: "verb" },
+  { latin: "scribit",      english: "writes, is writing",     pos: "verb" },
+  { latin: "recumbit",     english: "reclines, lies down",    pos: "verb" },
+  { latin: "iam",          english: "now, already",           pos: "adverb" },
+  { latin: "non",          english: "not",                    pos: "adverb" },
+  { latin: "strenue",      english: "strenuously, hard",      pos: "adverb" },
+  { latin: "laborat",      english: "works, is working",      pos: "verb" },
+  { latin: "cur",          english: "why?",                   pos: "adverb (interrogative)" },
+  { latin: "quod",         english: "because",                pos: "conjunction" },
+  { latin: "defessa",      english: "tired, exhausted",       pos: "adjective" },
+  { latin: "laeta",        english: "happy, glad",            pos: "adjective" },
+  { latin: "Davus",        english: "Davus (a slave name)",   pos: "proper noun" },
+  { latin: "servus",       english: "slave, servant",         pos: "noun" },
+  { latin: "magnus",       english: "big, great",             pos: "adjective" },
+  { latin: "parvus",       english: "small, little",          pos: "adjective" },
+  { latin: "ager",         english: "field, land",            pos: "noun" },
+  { latin: "Ecce!",        english: "Look! Behold!",          pos: "interjection" },
+  { latin: "Romani",       english: "Romans",                 pos: "noun (plural)" },
+];
+
+// ── State ──
+let fcDeck = [...vocab];
+let fcIndex = 0;
+let fcFlipped = false;
+
+let quizScore = 0;
+let quizTotal = 0;
+let quizPool = [];
+let quizQIndex = 0;
+
+let matchSelected = null;
+let matchDeck = [];
+
+// ── View switching ──
+function showView(name) {
+  ['flashcard','quiz','match','browse'].forEach(v => {
+    document.getElementById(v + '-view').style.display = 'none';
+  });
+  document.getElementById(name + '-view').style.display = 'block';
+  document.querySelectorAll('nav button').forEach((b, i) => {
+    b.classList.toggle('active', ['flashcard','quiz','match','browse'][i] === name);
+  });
+  if (name === 'flashcard') renderFlashcard();
+  if (name === 'quiz') initQuiz();
+  if (name === 'match') initMatch();
+  if (name === 'browse') renderBrowse();
+}
+
+// ── Flashcards ──
+function renderFlashcard() {
+  const card = fcDeck[fcIndex];
+  document.getElementById('fc-front-word').textContent = card.latin;
+  document.getElementById('fc-back-def').textContent   = card.english;
+  document.getElementById('fc-back-pos').textContent   = card.pos;
+  document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${fcDeck.length}`;
+  document.getElementById('fc-progress').style.width = `${((fcIndex + 1) / fcDeck.length) * 100}%`;
+  const scene = document.getElementById('fc-scene');
+  scene.classList.remove('flipped');
+  fcFlipped = false;
+}
+
+function flipCard() {
+  const scene = document.getElementById('fc-scene');
+  scene.classList.toggle('flipped');
+  fcFlipped = !fcFlipped;
+}
+
+function fcNav(dir) {
+  fcIndex = (fcIndex + dir + fcDeck.length) % fcDeck.length;
+  renderFlashcard();
+}
+
+function shuffleCards() {
+  fcDeck = [...fcDeck].sort(() => Math.random() - 0.5);
+  fcIndex = 0;
+  renderFlashcard();
+}
+
+// ── Multiple Choice ──
+function initQuiz() {
+  quizPool = [...vocab].sort(() => Math.random() - 0.5);
+  quizScore = 0;
+  quizTotal = 0;
+  quizQIndex = 0;
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const area = document.getElementById('quiz-area');
+  if (quizQIndex >= quizPool.length) {
+    area.innerHTML = `
+      <div class="result-screen">
+        <h2>Round Complete!</h2>
+        <div class="score">${quizScore}/${quizPool.length}</div>
+        <p>${quizScore === quizPool.length ? 'Perfect score! Optimus!' : 'Keep practicing!'}</p>
+        <button class="btn btn-primary" onclick="initQuiz()">Play Again</button>
+      </div>`;
+    document.getElementById('quiz-score').textContent = '';
+    return;
+  }
+
+  updateQuizScore();
+  const q = quizPool[quizQIndex];
+
+  // pick 3 wrong answers
+  const others = vocab.filter(v => v.latin !== q.latin).sort(() => Math.random() - 0.5).slice(0, 3);
+  const choices = [...others, q].sort(() => Math.random() - 0.5);
+
+  area.innerHTML = `
+    <div class="quiz-question">
+      <div class="quiz-prompt">What does this mean?</div>
+      <div class="quiz-term">${q.latin}</div>
+    </div>
+    <div class="quiz-options" id="quiz-options">
+      ${choices.map((c, i) => `
+        <button class="quiz-option" onclick="checkAnswer(this, '${c.latin}', '${q.latin}')">
+          ${c.english}
+        </button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+    <div style="text-align:center">
+      <button class="btn btn-secondary" id="next-btn" style="display:none" onclick="nextQuestion()">Next &rarr;</button>
+    </div>`;
+}
+
+function checkAnswer(btn, chosen, correct) {
+  const allBtns = document.querySelectorAll('.quiz-option');
+  allBtns.forEach(b => b.disabled = true);
+
+  const feedback = document.getElementById('quiz-feedback');
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    feedback.textContent = 'Correct! Optime!';
+    feedback.className = 'quiz-feedback correct';
+    quizScore++;
+  } else {
+    btn.classList.add('wrong');
+    // highlight correct
+    allBtns.forEach(b => {
+      if (b.getAttribute('onclick').includes(`'${correct}'`)) b.classList.add('correct');
+    });
+    const correctWord = vocab.find(v => v.latin === correct);
+    feedback.textContent = `Not quite — "${correct}" means "${correctWord.english}"`;
+    feedback.className = 'quiz-feedback wrong';
+  }
+  quizTotal++;
+  updateQuizScore();
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  quizQIndex++;
+  renderQuizQuestion();
+}
+
+function updateQuizScore() {
+  const remaining = quizPool.length - quizQIndex;
+  document.getElementById('quiz-score').textContent =
+    `Score: ${quizScore} / ${quizTotal}  •  ${remaining} card${remaining !== 1 ? 's' : ''} left`;
+}
+
+// ── Matching ──
+function initMatch() {
+  matchSelected = null;
+  // pick 6 random pairs
+  const pick = [...vocab].sort(() => Math.random() - 0.5).slice(0, 6);
+  const latinCards  = pick.map((v, i) => ({ id: i, text: v.latin,   type: 'latin',   matched: false }));
+  const engCards    = pick.map((v, i) => ({ id: i, text: v.english, type: 'english', matched: false }));
+  matchDeck = [...latinCards, ...engCards].sort(() => Math.random() - 0.5);
+
+  document.getElementById('match-status').textContent = 'Match each Latin word to its English meaning.';
+  renderMatchGrid();
+}
+
+function renderMatchGrid() {
+  const grid = document.getElementById('match-grid');
+  grid.innerHTML = matchDeck.map((card, idx) => `
+    <div class="match-card ${card.matched ? 'matched' : ''} ${matchSelected === idx ? 'selected' : ''}"
+         data-idx="${idx}"
+         onclick="selectMatchCard(${idx})">
+      ${card.text}
+    </div>`).join('');
+}
+
+function selectMatchCard(idx) {
+  const card = matchDeck[idx];
+  if (card.matched) return;
+
+  if (matchSelected === null) {
+    matchSelected = idx;
+    renderMatchGrid();
+    return;
+  }
+
+  if (matchSelected === idx) {
+    matchSelected = null;
+    renderMatchGrid();
+    return;
+  }
+
+  const prev = matchDeck[matchSelected];
+  // check match: same id, different type
+  if (prev.id === card.id && prev.type !== card.type) {
+    prev.matched = true;
+    card.matched = true;
+    matchSelected = null;
+    renderMatchGrid();
+
+    const remaining = matchDeck.filter(c => !c.matched).length;
+    if (remaining === 0) {
+      document.getElementById('match-status').textContent = '🏆 All matched! Perfect!';
+    } else {
+      document.getElementById('match-status').textContent = `${remaining / 2} pair${remaining / 2 !== 1 ? 's' : ''} remaining.`;
+    }
+  } else {
+    // wrong — shake both
+    matchSelected = null;
+    renderMatchGrid();
+    const cards = document.querySelectorAll('.match-card');
+    [idx, ...Array.from(document.querySelectorAll('.match-card'))
+      .map((el, i) => i)
+      .filter(i => i === matchSelected)].forEach(() => {});
+    // apply shake to both attempted cards
+    const allCards = document.querySelectorAll('.match-card');
+    [idx, Array.from(allCards).findIndex((el, i) => {
+      return matchDeck[i]?.id === prev.id && matchDeck[i]?.type === prev.type;
+    })].forEach(i => {
+      if (i >= 0 && allCards[i]) {
+        allCards[i].classList.add('wrong-shake');
+        setTimeout(() => allCards[i].classList.remove('wrong-shake'), 500);
+      }
+    });
+  }
+}
+
+// ── Browse ──
+function renderBrowse() {
+  const q = document.getElementById('browse-search').value.toLowerCase();
+  const filtered = vocab.filter(v =>
+    v.latin.toLowerCase().includes(q) || v.english.toLowerCase().includes(q) || v.pos.toLowerCase().includes(q)
+  );
+  document.getElementById('browse-tbody').innerHTML = filtered.map(v => `
+    <tr>
+      <td class="latin">${v.latin}</td>
+      <td>${v.english}</td>
+      <td class="pos">${v.pos}</td>
+    </tr>`).join('');
+}
+
+// ── Init ──
+showView('flashcard');
+</script>
+</body>
+</html>
